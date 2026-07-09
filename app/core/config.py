@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
 
 	app_name: str = "Oakfolio API"
-	api_v1_prefix: str = "api/v1"
+	api_v1_prefix: str = "/api/v1"
 	debug: bool = True
 
 	database_url: str
