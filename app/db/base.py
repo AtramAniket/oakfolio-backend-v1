@@ -3,4 +3,4 @@ from sqlalchemy.orm import DeclarativeBase
 class Base(DeclarativeBase):
 	pass
 
-from app.modules.models import PendingRegistration
+from app.modules.auth.models import PendingRegistration
