@@ -7,6 +7,6 @@ engine = create_engine(settings.DATABASE_URL, echo=settings.debug)
 
 SessionLocal = sessionmaker(
 	bind=engine,
-	autoflush=True,
-	autocommit=True,
+	autoflush=False,
+	autocommit=False,
 )
