@@ -10,7 +10,7 @@ class PendingRegistration(Base):
 	__tablename__ = "pending_registrations"
 
 	id: Mapped[UUID] = mapped_column(
-		UUID(as_uuid=True),
+		SQLAlchemyUUID(as_uuid=True),
 		primary_key=True,
 		default=uuid4,
 	)
