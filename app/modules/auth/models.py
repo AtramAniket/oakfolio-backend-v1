@@ -63,7 +63,7 @@ class User(Base):
 
 	password_hash: Mapped[str] = mapped_column(
 		Text,
-		nullable=True,
+		nullable=False,
 	)
 
 	verified_at: Mapped[datetime] = mapped_column(
