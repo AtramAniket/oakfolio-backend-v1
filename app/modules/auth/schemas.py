@@ -12,3 +12,6 @@ class RegisterResponse(BaseModel):
 	message: str
 	expires_in: int
 	can_resend: bool
+
+class DeleteRequest(BaseModel):
+	email: EmailStr
