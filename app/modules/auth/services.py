@@ -1,3 +1,4 @@
+from app.core.security import hash_verification_token, generate_verification_token
 from app.modules.auth.schemas import RegisterRequest, RegisterResponse
 from app.modules.auth.models import PendingRegistration
 from datetime import datetime, timezone, timedelta
@@ -27,17 +28,34 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 				can_resend=False,
 			)
 		# If token expired
+		expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+		
+		token = generate_verification_token()
+		hashed_token = hash_verification_token(token)
+		
+		pending_registration.expires_at = expires_at
+		pending_registration.token = hashed_token
+		
+		db.commit()
+		
+		db.refresh(pending_registration)
+		
 		return RegisterResponse(
 			message="Previous verification expired. A new verification email will be sent.",
-			expires_in=300,
 			can_resend=True,
+			expires_in=300,
 		)
 
 	# No pending registration exists
+	expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+	
+	token = generate_verification_token()
+	hashed_token = hash_verification_token(token)
+
 	new_pending_registration = PendingRegistration(
-		expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
+		expires_at=expires_at,
 		email=payload.email,
-		token=f"test-{payload.email}",
+		token=hashed_token,
 	)
 
 	db.add(new_pending_registration)
@@ -45,9 +63,9 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 	db.commit()
 
 	db.refresh(new_pending_registration)
-	
+
 	return RegisterResponse(
-		message="Verification email already sent",
-		expires_in=300,
+		message="Verification email sent successfully",
 		can_resend=False,
+		expires_in=300,
 	)
