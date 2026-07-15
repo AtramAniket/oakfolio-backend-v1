@@ -18,3 +18,13 @@ class DeleteRequest(BaseModel):
 
 class DeleteResponse(BaseModel):
 	message: str
+
+class VerifyUserRequest(BaseModel):
+	token: str
+	password: str = Field(
+		min_length=8,
+		max_length=128,
+	)
+
+class VerifyUserResponse(BaseModel):
+	message: str
