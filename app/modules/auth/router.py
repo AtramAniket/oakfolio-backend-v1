@@ -1,4 +1,9 @@
-from app.modules.auth.schemas import RegisterRequest, RegisterResponse
+from app.modules.auth.schemas import (
+	RegisterResponse,
+	RegisterRequest,
+	DeleteResponse,
+	DeleteRequest,
+)
 import app.modules.auth.services as auth_service 
 from app.api.v1.dependency import SessionDep
 from fastapi import APIRouter
@@ -14,3 +19,7 @@ async def auth_test():
 @auth_router.post("/register", response_model=RegisterResponse)
 async def register(payload: RegisterRequest,db: SessionDep):
 	return await auth_service.register_user(db=db, payload=payload)
+
+@auth_router.post("/delete_pending_registration", response_model=DeleteResponse)
+async def register(payload: DeleteRequest,db: SessionDep):
+	return await auth_service.delete_pending_registration(db=db, payload=payload)
