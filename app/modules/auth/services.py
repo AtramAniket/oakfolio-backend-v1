@@ -1,5 +1,10 @@
+from app.modules.auth.schemas import (
+	RegisterResponse,
+	RegisterRequest,
+	DeleteResponse,
+	DeleteRequest,
+)
 from app.core.security import hash_verification_token, generate_verification_token
-from app.modules.auth.schemas import RegisterRequest, RegisterResponse
 from app.modules.auth.models import PendingRegistration
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
@@ -68,4 +73,29 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 		message="Verification email sent successfully",
 		can_resend=False,
 		expires_in=300,
+	)
+
+
+async def delete_pending_registration(db: Session, payload: DeleteRequest) -> DeleteResponse:
+	statement = select(PendingRegistration).where(
+		PendingRegistration.email == payload.email
+	)
+	
+	result = db.execute(statement)
+
+	pending_registration = result.scalar_one_or_none()
+
+	# If email is present
+	if pending_registration:
+
+		db.delete(pending_registration)
+
+		db.commit()
+
+		return DeleteResponse(
+			message=f"User with email {payload.email} deleted successfully from pending registrations"
+		)
+	#  If email is not present
+	return DeleteResponse(
+		message=f"No user with email {payload.email} found in pending registrations"
 	)
