@@ -15,3 +15,6 @@ class RegisterResponse(BaseModel):
 
 class DeleteRequest(BaseModel):
 	email: EmailStr
+
+class DeleteResponse(BaseModel):
+	message: str
