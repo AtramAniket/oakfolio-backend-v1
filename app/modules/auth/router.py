@@ -1,4 +1,5 @@
-from app.modules.auth.schemas import RegisterRequest
+from app.modules.auth.schemas import RegisterRequest, RegisterResponse
+import app.modules.auth.services as auth_service 
 from app.api.v1.dependency import SessionDep
 from fastapi import APIRouter
 
@@ -10,6 +11,6 @@ async def auth_test():
 		"message":"Authentication router working"
 	}
 
-@auth_router.post("/register")
+@auth_router.post("/register", response_model=RegisterResponse)
 async def register(payload: RegisterRequest,db: SessionDep):
-	pass
+	return await auth_service.register_user(db=db, payload=payload)
