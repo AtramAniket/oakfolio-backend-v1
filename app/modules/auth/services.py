@@ -1,11 +1,13 @@
 from app.modules.auth.schemas import (
+	VerifyUserResponse,
+	VerifyUserRequest,
 	RegisterResponse,
 	RegisterRequest,
 	DeleteResponse,
 	DeleteRequest,
 )
-from app.core.security import hash_verification_token, generate_verification_token
-from app.modules.auth.models import PendingRegistration
+from app.core.security import hash_verification_token, generate_verification_token, hash_password, verify_password
+from app.modules.auth.models import PendingRegistration, User
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -47,6 +49,7 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 		
 		return RegisterResponse(
 			message="Previous verification expired. A new verification email will be sent.",
+			verification_token=token,
 			can_resend=True,
 			expires_in=300,
 		)
@@ -71,6 +74,7 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 
 	return RegisterResponse(
 		message="Verification email sent successfully",
+		verification_token=token,
 		can_resend=False,
 		expires_in=300,
 	)
@@ -98,4 +102,65 @@ async def delete_pending_registration(db: Session, payload: DeleteRequest) -> De
 	#  If email is not present
 	return DeleteResponse(
 		message=f"No user with email {payload.email} found in pending registrations"
+	)
+
+
+async def verify_and_create_new_user(db:Session, payload:VerifyUserRequest) -> VerifyUserResponse:
+	
+	# Hash incoming raw token
+	hashed_token = hash_verification_token(payload.token)
+
+	# Hash plain text password
+	hashed_password = hash_password(payload.password)
+
+	# Find user in pending registrations
+	statement = select(PendingRegistration).where(
+		PendingRegistration.token == hashed_token)
+
+	result = db.execute(statement)
+
+	pending_registration = result.scalar_one_or_none()
+
+	# Check if token is valid
+	if not pending_registration:
+		return VerifyUserResponse(
+				message="Invalid token."
+		)
+
+	# Check if user already exists
+	existing_user_statement = select(User).where(
+		User.email == pending_registration.email)
+
+	existing_user_result = db.execute(existing_user_statement)
+
+	existing_user = existing_user_result.scalar_one_or_none()
+
+	if existing_user:
+		return VerifyUserResponse(
+				message="User already exists"
+		)
+
+	# Check if token is expired
+	if datetime.now(timezone.utc) > pending_registration.expires_at:
+		return VerifyUserResponse(
+			message="Verification token expired."
+		)
+
+	# # Create new user
+	new_user = User(
+		username=pending_registration.email,
+		email=pending_registration.email,
+		password_hash=hashed_password,
+	)
+
+	db.add(new_user)
+
+	# # Remove pending registration for user
+	db.delete(pending_registration)
+
+	# # Add new user and commit to user table while removing from pending transaction
+	db.commit()
+
+	return VerifyUserResponse(
+		message="User created successfully."
 	)
