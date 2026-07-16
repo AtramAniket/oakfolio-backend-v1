@@ -1,4 +1,6 @@
 from app.modules.auth.schemas import (
+	VerifyUserResponse,
+	VerifyUserRequest,
 	RegisterResponse,
 	RegisterRequest,
 	DeleteResponse,
@@ -21,5 +23,9 @@ async def register(payload: RegisterRequest,db: SessionDep):
 	return await auth_service.register_user(db=db, payload=payload)
 
 @auth_router.post("/delete_pending_registration", response_model=DeleteResponse)
-async def register(payload: DeleteRequest,db: SessionDep):
+async def delete_pending_user(payload: DeleteRequest,db: SessionDep):
 	return await auth_service.delete_pending_registration(db=db, payload=payload)
+
+@auth_router.post("/create_user", response_model=VerifyUserResponse)
+async def create_user(payload: VerifyUserRequest, db:SessionDep):
+	return await auth_service.verify_and_create_new_user(db=db, payload=payload)
