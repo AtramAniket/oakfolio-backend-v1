@@ -28,6 +28,7 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 			message="User already exists"
 		)
 
+	# Get the user from pending registrations table
 	statement = select(PendingRegistration).where(
 		PendingRegistration.email == payload.email
 	)
