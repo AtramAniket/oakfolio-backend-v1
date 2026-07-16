@@ -12,6 +12,7 @@ class RegisterResponse(BaseModel):
 	message: str
 	expires_in: int
 	can_resend: bool
+	verification_token: str | None = None
 
 class DeleteRequest(BaseModel):
 	email: EmailStr
@@ -23,7 +24,7 @@ class VerifyUserRequest(BaseModel):
 	token: str
 	password: str = Field(
 		min_length=8,
-		max_length=128,
+		max_length=64,
 	)
 
 class VerifyUserResponse(BaseModel):
