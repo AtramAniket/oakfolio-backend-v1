@@ -6,7 +6,12 @@ from app.modules.auth.schemas import (
 	DeleteResponse,
 	DeleteRequest,
 )
-from app.core.security import hash_verification_token, generate_verification_token, hash_password, verify_password
+from app.core.security import (
+	generate_verification_token,
+	hash_verification_token,
+	verify_password,
+	hash_password,
+)
 from app.modules.auth.models import PendingRegistration, User
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
