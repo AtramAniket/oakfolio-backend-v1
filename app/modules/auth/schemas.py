@@ -10,8 +10,8 @@ class RegisterRequest(BaseModel):
 
 class RegisterResponse(BaseModel):
 	message: str
-	expires_in: int
-	can_resend: bool
+	expires_in: int | None = None
+	can_resend: bool | None = None
 	verification_token: str | None = None
 
 class DeleteRequest(BaseModel):
