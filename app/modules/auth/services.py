@@ -16,7 +16,6 @@ from sqlalchemy import select
 async def register_user(db:Session, payload: RegisterRequest) -> RegisterResponse:
 	
 	# Check if user already registered
-	# Check if user already exists
 	existing_user_statement = select(User).where(
 		User.email == payload.email)
 
