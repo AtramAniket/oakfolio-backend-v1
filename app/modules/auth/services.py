@@ -14,6 +14,21 @@ from sqlalchemy import select
 
 
 async def register_user(db:Session, payload: RegisterRequest) -> RegisterResponse:
+	
+	# Check if user already registered
+	# Check if user already exists
+	existing_user_statement = select(User).where(
+		User.email == payload.email)
+
+	existing_user_result = db.execute(existing_user_statement)
+
+	existing_user = existing_user_result.scalar_one_or_none()
+
+	if existing_user:
+		return RegisterResponse(
+			message="User already exists"
+		)
+
 	statement = select(PendingRegistration).where(
 		PendingRegistration.email == payload.email
 	)
@@ -125,19 +140,6 @@ async def verify_and_create_new_user(db:Session, payload:VerifyUserRequest) -> V
 	if not pending_registration:
 		return VerifyUserResponse(
 				message="Invalid token."
-		)
-
-	# Check if user already exists
-	existing_user_statement = select(User).where(
-		User.email == pending_registration.email)
-
-	existing_user_result = db.execute(existing_user_statement)
-
-	existing_user = existing_user_result.scalar_one_or_none()
-
-	if existing_user:
-		return VerifyUserResponse(
-				message="User already exists"
 		)
 
 	# Check if token is expired
