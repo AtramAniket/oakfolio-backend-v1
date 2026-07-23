@@ -1,4 +1,6 @@
 from app.modules.auth.schemas import (
+	VerifyRegistrationTokenResponse,
+	VerifyRegistrationTokenRequest,
 	VerifyUserResponse,
 	VerifyUserRequest,
 	RegisterResponse,
@@ -16,6 +18,40 @@ from app.modules.auth.models import PendingRegistration, User
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+
+
+async def verify_user_registration_token(db:Session, payload: VerifyRegistrationTokenRequest) -> VerifyRegistrationTokenResponse:
+
+	hashed_token = hash_verification_token(payload.verification_token)
+	
+	# Get the user from pending registrations table
+	statement = select(PendingRegistration).where(
+		PendingRegistration.token == hashed_token
+	)
+	
+	result = db.execute(statement)
+
+	pending_registration = result.scalar_one_or_none()
+
+
+	# Check if token is valid
+	if(not pending_registration):
+		return VerifyRegistrationTokenResponse(
+			message="Invalid token",
+			token_valid=False,
+		)
+
+	# Check if token has expired
+	if datetime.now(timezone.utc) > pending_registration.expires_at:
+		return VerifyRegistrationTokenResponse(
+			message="Verification token expired",
+			token_valid=False,
+		)
+	else:
+		return VerifyRegistrationTokenResponse(
+			token_valid=True,
+		)
+
 
 
 async def register_user(db:Session, payload: RegisterRequest) -> RegisterResponse:
@@ -100,6 +136,8 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 	)
 
 
+
+
 async def delete_pending_registration(db: Session, payload: DeleteRequest) -> DeleteResponse:
 	statement = select(PendingRegistration).where(
 		PendingRegistration.email == payload.email
@@ -119,10 +157,12 @@ async def delete_pending_registration(db: Session, payload: DeleteRequest) -> De
 		return DeleteResponse(
 			message=f"User with email {payload.email} deleted successfully from pending registrations"
 		)
-	#  If email is not present
+	# If email is not present
 	return DeleteResponse(
 		message=f"No user with email {payload.email} found in pending registrations"
 	)
+
+
 
 
 async def verify_and_create_new_user(db:Session, payload:VerifyUserRequest) -> VerifyUserResponse:
@@ -153,7 +193,7 @@ async def verify_and_create_new_user(db:Session, payload:VerifyUserRequest) -> V
 			message="Verification token expired."
 		)
 
-	# # Create new user
+	# Create new user
 	new_user = User(
 		username=pending_registration.email,
 		email=pending_registration.email,
@@ -162,10 +202,10 @@ async def verify_and_create_new_user(db:Session, payload:VerifyUserRequest) -> V
 
 	db.add(new_user)
 
-	# # Remove pending registration for user
+	# Remove pending registration for user
 	db.delete(pending_registration)
 
-	# # Add new user and commit to user table while removing from pending transaction
+	# Add new user and commit to user table while removing from pending transaction
 	db.commit()
 
 	return VerifyUserResponse(

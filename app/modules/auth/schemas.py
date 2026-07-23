@@ -1,5 +1,12 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+class VerifyRegistrationTokenRequest(BaseModel):
+	verification_token: str
+
+class VerifyRegistrationTokenResponse(BaseModel):
+	message: str | None = None
+	token_valid: bool
+
 class RegisterRequest(BaseModel):
 	email: EmailStr
 

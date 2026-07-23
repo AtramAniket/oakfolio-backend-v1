@@ -1,4 +1,6 @@
 from app.modules.auth.schemas import (
+	VerifyRegistrationTokenResponse,
+	VerifyRegistrationTokenRequest,
 	VerifyUserResponse,
 	VerifyUserRequest,
 	RegisterResponse,
@@ -17,6 +19,10 @@ async def auth_test():
 	return {
 		"message":"Authentication router working"
 	}
+
+@auth_router.post("/verify-registration-token", response_model=VerifyRegistrationTokenResponse)
+async def verify_registration_token(payload: VerifyRegistrationTokenRequest, db: SessionDep):
+	return await auth_service.verify_user_registration_token(db=db, payload=payload)
 
 @auth_router.post("/register", response_model=RegisterResponse)
 async def register(payload: RegisterRequest,db: SessionDep):
