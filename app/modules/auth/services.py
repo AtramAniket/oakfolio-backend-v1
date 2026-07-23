@@ -37,19 +37,17 @@ async def verify_user_registration_token(db:Session, payload: VerifyRegistration
 	# Check if token is valid
 	if(not pending_registration):
 		return VerifyRegistrationTokenResponse(
-			message="Invalid token",
-			token_valid=False,
+			status="invalid",
 		)
 
 	# Check if token has expired
 	if datetime.now(timezone.utc) > pending_registration.expires_at:
 		return VerifyRegistrationTokenResponse(
-			message="Verification token expired",
-			token_valid=False,
+			status="expired",
 		)
 	else:
 		return VerifyRegistrationTokenResponse(
-			token_valid=True,
+			status="valid",
 		)
 
 

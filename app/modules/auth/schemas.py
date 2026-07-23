@@ -1,11 +1,11 @@
+from typing import Literal
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 class VerifyRegistrationTokenRequest(BaseModel):
 	verification_token: str
 
 class VerifyRegistrationTokenResponse(BaseModel):
-	message: str | None = None
-	token_valid: bool
+	status: Literal["invalid", "expired", "valid"]
 
 class RegisterRequest(BaseModel):
 	email: EmailStr
