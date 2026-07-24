@@ -7,17 +7,63 @@ from app.modules.auth.schemas import (
 	RegisterRequest,
 	DeleteResponse,
 	DeleteRequest,
+	LoginResponse,
+	LoginRequest,
+	UserResponse,
 )
 from app.core.security import (
 	generate_verification_token,
 	hash_verification_token,
+	create_access_token,
 	verify_password,
 	hash_password,
 )
 from app.modules.auth.models import PendingRegistration, User
 from datetime import datetime, timezone, timedelta
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+
+
+
+async def login(db:Session, payload:LoginRequest) -> LoginResponse:
+	
+	# FInd user by email
+	find_user_statement = select(User).where(
+		User.email == payload.email
+	)
+
+	result = db.execute(find_user_statement)
+
+	user = result.scalar_one_or_none()
+
+	# If user is not present
+	if not user:
+		raise HTTPException(
+			status_code=status.HTTP_401_UNAUTHORIZED,
+			detail='Invalid email or password'
+		)
+	
+	# If password verification failed
+	password_match = verify_password(payload.password, user.password_hash)
+	if not password_match:
+		raise HTTPException(
+			status_code=status.HTTP_401_UNAUTHORIZED,
+			detail='Invalid email or password'
+		)
+	
+	# Generate JWT token
+	jwt_token = create_access_token(user.id)
+	return LoginResponse(
+		token_type="bearer",
+		access_token=jwt_token,
+		user=UserResponse(
+			id = user.id,
+			email = user.email,
+			username = user.username,
+			verified_at = user.verified_at,
+		)
+	)
 
 
 async def verify_user_registration_token(db:Session, payload: VerifyRegistrationTokenRequest) -> VerifyRegistrationTokenResponse:
