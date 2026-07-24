@@ -2,6 +2,7 @@ import hashlib
 import secrets
 from jose import jwt
 from uuid import UUID
+from typing import Any
 from app.core.config import settings
 from passlib.context import CryptContext
 from datetime import datetime, timezone, timedelta
@@ -24,15 +25,15 @@ def create_access_token(user_id: UUID) -> str:
 	return jwt.encode(
 		payload,
 		settings.secret_key,
-		algorithm=settings.algorithm,
+		algorithms=[settings.algorithm],
 	)
 
-def decode_access_token(token: str) -> UUID:
+def decode_access_token(token: str) -> dict[str, Any]:
 	"""Function returns user's id if the token is valid"""
 	payload = jwt.decode(
 		token,
 		settings.secret_key,
-		algorithm=settings.algorithm,
+		algorithms=[settings.algorithm],
 	)
 
 	return payload
