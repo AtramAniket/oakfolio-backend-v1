@@ -9,6 +9,8 @@ from app.modules.auth.schemas import (
 	DeleteRequest,
 	LoginResponse,
 	LoginRequest,
+	UserResponse,
+	UserRequest,
 )
 import app.modules.auth.services as auth_service 
 from app.api.v1.dependency import SessionDep
@@ -43,6 +45,9 @@ async def create_user(payload: VerifyUserRequest, db:SessionDep):
 async def register(payload: RegisterRequest,db: SessionDep):
 	return await auth_service.register_user(db=db, payload=payload)
 
+@auth_router.post("/me", response_model=UserResponse)
+async def current_user(payload: UserRequest, db:SessionDep):
+	return await auth_service.get_current_user(db=db, payload=payload)
 
 @auth_router.post("/login", response_model=LoginResponse)
 async def login(payload: LoginRequest, db:SessionDep):

@@ -10,19 +10,23 @@ from app.modules.auth.schemas import (
 	LoginResponse,
 	LoginRequest,
 	UserResponse,
+	UserRequest,
 )
 from app.core.security import (
 	generate_verification_token,
 	hash_verification_token,
 	create_access_token,
+	decode_access_token,
 	verify_password,
 	hash_password,
 )
 from app.modules.auth.models import PendingRegistration, User
 from datetime import datetime, timezone, timedelta
+from jose import JWTError, ExpiredSignatureError
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from uuid import UUID
 
 
 
@@ -66,7 +70,55 @@ async def login(db:Session, payload:LoginRequest) -> LoginResponse:
 	)
 
 
-async def verify_user_registration_token(db:Session, payload: VerifyRegistrationTokenRequest) -> VerifyRegistrationTokenResponse:
+async def get_current_user(db:Session, payload:UserRequest) -> UserResponse:
+	token_timeout_exception = HTTPException(
+		status_code=status.HTTP_401_UNAUTHORIZED,
+		detail='Access token expired. Please generate new access token',
+		headers={"WWW-Authenticate": "Bearer"},
+	)
+	
+	credentials_exception = HTTPException(
+		status_code=status.HTTP_401_UNAUTHORIZED,
+		detail='Could not validate credentials',
+		headers={"WWW-Authenticate": "Bearer"},
+	)
+
+	user_not_found_exception = HTTPException(
+		status_code=status.HTTP_404_NOT_FOUND,
+		detail='User not found',
+	)
+
+	try:
+		jwt_payload = decode_access_token(payload.access_token)
+		 
+		current_user_id = UUID(jwt_payload.get("sub"))
+		 
+		if current_user_id is None:
+			raise credentials_exception
+	
+	except ExpiredSignatureError:
+		raise token_timeout_exception
+
+	except JWTError:
+		raise credentials_exception
+
+	current_user_statement = select(User).where(
+		User.id == current_user_id)
+
+	result = db.execute(current_user_statement).scalar_one_or_none()
+
+	if result is None:
+		raise user_not_found_exception
+
+	return UserResponse(
+		id=result.id,
+		email=result.email,
+		username=result.username,
+		verified_at=result.verified_at,
+	)
+
+
+async def verify_user_registration_token(db:Session, payload:VerifyRegistrationTokenRequest) -> VerifyRegistrationTokenResponse:
 
 	hashed_token = hash_verification_token(payload.verification_token)
 	
@@ -98,7 +150,7 @@ async def verify_user_registration_token(db:Session, payload: VerifyRegistration
 
 
 
-async def register_user(db:Session, payload: RegisterRequest) -> RegisterResponse:
+async def register_user(db:Session, payload:RegisterRequest) -> RegisterResponse:
 	
 	# Check if user already registered
 	existing_user_statement = select(User).where(
@@ -182,7 +234,7 @@ async def register_user(db:Session, payload: RegisterRequest) -> RegisterRespons
 
 
 
-async def delete_pending_registration(db: Session, payload: DeleteRequest) -> DeleteResponse:
+async def delete_pending_registration(db:Session, payload:DeleteRequest) -> DeleteResponse:
 	statement = select(PendingRegistration).where(
 		PendingRegistration.email == payload.email
 	)

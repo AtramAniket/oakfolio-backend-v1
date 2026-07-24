@@ -39,6 +39,9 @@ class VerifyUserRequest(BaseModel):
 class VerifyUserResponse(BaseModel):
 	message: str
 
+class UserRequest(BaseModel):
+	access_token: str
+
 class UserResponse(BaseModel):
 	id: UUID
 	email: str
