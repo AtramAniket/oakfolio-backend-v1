@@ -27,8 +27,16 @@ def create_access_token(user_id: UUID) -> str:
 		algorithm=settings.algorithm,
 	)
 
-def decode_access_token() -> str:
-	pass
+def decode_access_token(token: str) -> UUID:
+	"""Function returns user's id if the token is valid"""
+	payload = jwt.decode(
+		token,
+		settings.secret_key,
+		algorithm=settings.algorithm,
+	)
+
+	return payload
+	
 
 def generate_verification_token() -> str:
 	""" Function generates tokens for user email verification """
