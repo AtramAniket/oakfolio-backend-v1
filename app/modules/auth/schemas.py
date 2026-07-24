@@ -1,4 +1,6 @@
+from uuid import UUID
 from typing import Literal
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 class VerifyRegistrationTokenRequest(BaseModel):
@@ -36,3 +38,18 @@ class VerifyUserRequest(BaseModel):
 
 class VerifyUserResponse(BaseModel):
 	message: str
+
+class UserResponse(BaseModel):
+	id: UUID
+	email: str
+	username: str
+	verified_at: datetime
+
+class LoginRequest(BaseModel):
+	password: str
+	email: EmailStr
+
+class LoginResponse(BaseModel):
+	token_type: str | None = None
+	access_token: str | None = None
+	user: UserResponse | None = None
