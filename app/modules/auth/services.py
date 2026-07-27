@@ -22,12 +22,17 @@ from app.core.security import (
 )
 from app.modules.auth.models import PendingRegistration, User
 from datetime import datetime, timezone, timedelta
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, ExpiredSignatureError
+from app.api.v1.dependency import SessionDep
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from fastapi import Depends
 from uuid import UUID
 
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 async def login(db:Session, payload:LoginRequest) -> LoginResponse:
@@ -70,7 +75,7 @@ async def login(db:Session, payload:LoginRequest) -> LoginResponse:
 	)
 
 
-async def get_current_user(db:Session, payload:UserRequest) -> UserResponse:
+async def get_current_user(db:SessionDep, token: str = Depends(oauth2_scheme)) -> UserResponse:
 	token_timeout_exception = HTTPException(
 		status_code=status.HTTP_401_UNAUTHORIZED,
 		detail='Access token expired. Please generate new access token',
@@ -89,7 +94,7 @@ async def get_current_user(db:Session, payload:UserRequest) -> UserResponse:
 	)
 
 	try:
-		jwt_payload = decode_access_token(payload.access_token)
+		jwt_payload = decode_access_token(token)
 		 
 		current_user_id = UUID(jwt_payload.get("sub"))
 		 

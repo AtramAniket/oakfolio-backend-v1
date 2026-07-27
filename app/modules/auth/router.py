@@ -14,7 +14,7 @@ from app.modules.auth.schemas import (
 )
 import app.modules.auth.services as auth_service 
 from app.api.v1.dependency import SessionDep
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -45,9 +45,9 @@ async def create_user(payload: VerifyUserRequest, db:SessionDep):
 async def register(payload: RegisterRequest,db: SessionDep):
 	return await auth_service.register_user(db=db, payload=payload)
 
-@auth_router.post("/me", response_model=UserResponse)
-async def current_user(payload: UserRequest, db:SessionDep):
-	return await auth_service.get_current_user(db=db, payload=payload)
+@auth_router.get("/me")
+async def current_user(current_user: UserResponse = Depends(auth_service.get_current_user)):
+	return current_user
 
 @auth_router.post("/login", response_model=LoginResponse)
 async def login(payload: LoginRequest, db:SessionDep):
