@@ -166,10 +166,11 @@ async def register_user(db:Session, payload:RegisterRequest) -> RegisterResponse
 	existing_user = existing_user_result.scalar_one_or_none()
 
 	if existing_user:
-		return RegisterResponse(
-			message="User already exists"
+		raise HTTPException(
+			status_code=status.HTTP_409_CONFLICT,
+			detail='An account already exists with this email.'
 		)
-
+		
 	# Get the user from pending registrations table
 	statement = select(PendingRegistration).where(
 		PendingRegistration.email == payload.email
