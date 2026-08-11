@@ -47,7 +47,12 @@ async def register(payload: RegisterRequest,db: SessionDep):
 
 @auth_router.get("/me")
 async def current_user(current_user: UserResponse = Depends(auth_service.get_current_user)):
-	return current_user
+	return UserResponse(
+		id=current_user.id,
+		email=current_user.email,
+		username=current_user.username,
+		verified_at=current_user.verified_at,
+	)
 
 @auth_router.post("/login", response_model=LoginResponse)
 async def login(payload: LoginRequest, db:SessionDep):
