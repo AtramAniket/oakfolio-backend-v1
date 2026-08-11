@@ -1,5 +1,5 @@
+from pydantic import BaseModel, Field, ConfigDict
 from app.modules.stocks.models import Exchange
-from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 from decimal import Decimal
@@ -28,6 +28,8 @@ class AddStockResponse(BaseModel):
 
 
 class HoldingsResponse(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+
 	id: UUID
 	portfolio_id: UUID
 	company_name: str
@@ -64,6 +66,8 @@ class CreateNewPortfolioResponse(BaseModel):
 
 
 class PortfolioResponse(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+	
 	id: UUID
 	user_id: UUID
 	name: str
