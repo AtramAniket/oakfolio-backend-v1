@@ -75,7 +75,7 @@ async def login(db:Session, payload:LoginRequest) -> LoginResponse:
 	)
 
 
-async def get_current_user(db:SessionDep, token: str = Depends(oauth2_scheme)) -> UserResponse:
+async def get_current_user(db:SessionDep, token: str = Depends(oauth2_scheme)) -> User:
 	token_timeout_exception = HTTPException(
 		status_code=status.HTTP_401_UNAUTHORIZED,
 		detail='Access token expired. Please generate new access token',
@@ -115,12 +115,7 @@ async def get_current_user(db:SessionDep, token: str = Depends(oauth2_scheme)) -
 	if result is None:
 		raise user_not_found_exception
 
-	return UserResponse(
-		id=result.id,
-		email=result.email,
-		username=result.username,
-		verified_at=result.verified_at,
-	)
+	return result
 
 
 async def verify_user_registration_token(db:Session, payload:VerifyRegistrationTokenRequest) -> VerifyRegistrationTokenResponse:
