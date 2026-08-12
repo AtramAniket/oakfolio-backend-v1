@@ -26,7 +26,6 @@ class AddStockResponse(BaseModel):
 	company_name: str
 	ticker: str
 
-
 class HoldingsResponse(BaseModel):
 	model_config = ConfigDict(from_attributes=True)
 
@@ -39,8 +38,9 @@ class HoldingsResponse(BaseModel):
 	buy_price: Decimal = Field(gt=0)
 	buy_date: datetime
 
-
 class GetHoldingsResponse(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+
 	holdings: list[HoldingsResponse]
 
 
@@ -76,6 +76,8 @@ class PortfolioResponse(BaseModel):
 
 
 class GetAllPortfoliosResponse(BaseModel):
+	model_config = ConfigDict(from_attributes=True)
+
 	message: str
 	portfolios: list[PortfolioResponse]
 
