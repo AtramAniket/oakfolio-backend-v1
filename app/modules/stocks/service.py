@@ -5,8 +5,6 @@ from app.modules.stocks.schema import (
 	DeletePortfolioResponse,
 	DeleteHoldingsResponse,
 	GetHoldingsResponse,
-	PortfolioResponse,
-	HoldingsResponse,
 	AddStockResponse,
 	AddStockRequest,
 )

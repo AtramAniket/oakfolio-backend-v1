@@ -5,8 +5,6 @@ from app.modules.stocks.schema import (
 	DeletePortfolioResponse,
 	DeleteHoldingsResponse,
 	GetHoldingsResponse,
-	PortfolioResponse,
-	HoldingsResponse,
 	AddStockResponse,
 	AddStockRequest,
 )
@@ -103,7 +101,7 @@ async def get_holdings(
 	)
 
 
-@api_v1_stocks_router.post("/portfolios/{portfolio_id}/holdings", response_model=AddStockResponse, status_code=status.HTTP_200_OK)
+@api_v1_stocks_router.post("/portfolios/{portfolio_id}/holdings", response_model=AddStockResponse, status_code=status.HTTP_201_CREATED)
 async def add_stock_to_portfolio(
 	db: SessionDep,
 	portfolio_id: UUID,
@@ -135,7 +133,7 @@ async def remove_stock_from_portfolio(
 	db: SessionDep,
 	holding_id: UUID,
 	portfolio_id: UUID,
-	current_user=UserDep):
+	current_user: UserDep):
 	
 	return await stocks_service.delete_stock_from_portfolio(
 		db=db,
