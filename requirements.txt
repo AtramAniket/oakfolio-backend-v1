@@ -31,6 +31,7 @@ mdurl==0.1.2
 passlib==1.7.4
 psycopg==3.3.4
 psycopg-binary==3.3.4
+psycopg2==2.9.12
 pwdlib==0.3.0
 pyasn1==0.6.4
 pycparser==3.0
