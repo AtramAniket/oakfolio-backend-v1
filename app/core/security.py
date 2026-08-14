@@ -7,6 +7,7 @@ from app.core.config import settings
 from passlib.context import CryptContext
 from datetime import datetime, timezone, timedelta
 
+
 pwd_context = CryptContext(
 	schemes=["bcrypt"],
 	deprecated="auto",
@@ -52,3 +53,6 @@ def hash_password(password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
 	return pwd_context.verify(plain_password, hashed_password)
+
+def generate_verification_link(token: str) -> str:
+	return f"{settings.frontend_url}/verify?token={token}"
