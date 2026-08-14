@@ -38,7 +38,7 @@ def send_mail(msg, debug=True):
 			service_mail_server.login(SENDER_ADDR, SENDER_MAIL_PASSWORD)
 			service_mail_server.send_message(msg)
 
-def send_email_verification_mail(verification_link, reciepient):
+def send_email_verification_mail(verification_link, reciepient, debug=False):
 	if not verification_link: return
 
 	subject="Verify your oakfolio account"
@@ -55,4 +55,4 @@ def send_email_verification_mail(verification_link, reciepient):
 
 	message = build_email_message(to=reciepient, sub=subject, content=content)
 
-	send_mail(message)
+	send_mail(message, debug=debug)
