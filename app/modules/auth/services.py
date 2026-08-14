@@ -14,6 +14,7 @@ from app.modules.auth.schemas import (
 )
 from app.core.security import (
 	generate_verification_token,
+	generate_verification_link,
 	hash_verification_token,
 	create_access_token,
 	decode_access_token,
@@ -31,6 +32,7 @@ from sqlalchemy import select
 from fastapi import Depends
 from uuid import UUID
 
+from app.utils.mail_service import send_email_verification_mail
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -129,7 +131,10 @@ async def verify_user_registration_token(db:Session, payload:VerifyRegistrationT
 	
 	result = db.execute(statement)
 
+
 	pending_registration = result.scalar_one_or_none()
+
+	print(pending_registration.email)
 
 
 	# Check if token is valid
@@ -199,6 +204,10 @@ async def register_user(db:Session, payload:RegisterRequest) -> RegisterResponse
 		db.commit()
 		
 		db.refresh(pending_registration)
+
+		verification_link = generate_verification_link(token)
+
+		send_email_verification_mail(verification_link, payload.email)
 		
 		return RegisterResponse(
 			message="Previous verification expired. A new verification email will be sent.",
@@ -224,6 +233,10 @@ async def register_user(db:Session, payload:RegisterRequest) -> RegisterResponse
 	db.commit()
 
 	db.refresh(new_pending_registration)
+
+	verification_link = generate_verification_link(token)
+
+	send_email_verification_mail(verification_link, payload.email)
 
 	return RegisterResponse(
 		message="Verification email sent successfully",
