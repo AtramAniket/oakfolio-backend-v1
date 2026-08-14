@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 	algorithm: str
 	access_token_expire_minutes: str
 
+	frontend_url: str
+
 	model_config = SettingsConfigDict(
 		env_file=".env",
 		extra="ignore",
