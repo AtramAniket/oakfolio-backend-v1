@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 	access_token_expire_minutes: str
 
 	frontend_url: str
+	resend_api_key: str
 
 	model_config = SettingsConfigDict(
 		env_file=".env",
