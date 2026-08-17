@@ -13,7 +13,8 @@ class Settings(BaseSettings):
 	access_token_expire_minutes: str
 
 	frontend_url: str
-	resend_api_key: str
+	brevo_api_key: str
+	oakfolio_app_mail_addr: str
 
 	model_config = SettingsConfigDict(
 		env_file=".env",
