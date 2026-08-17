@@ -207,7 +207,7 @@ async def register_user(db:Session, payload:RegisterRequest) -> RegisterResponse
 
 		verification_link = generate_verification_link(token)
 
-		send_email_verification_mail(verification_link, payload.email)
+		await send_email_verification_mail(verification_link, payload.email)
 		
 		return RegisterResponse(
 			message="Previous verification expired. A new verification email will be sent.",
@@ -236,7 +236,7 @@ async def register_user(db:Session, payload:RegisterRequest) -> RegisterResponse
 
 	verification_link = generate_verification_link(token)
 
-	send_email_verification_mail(verification_link, payload.email)
+	await send_email_verification_mail(verification_link, payload.email)
 
 	return RegisterResponse(
 		message="Verification email sent successfully",
