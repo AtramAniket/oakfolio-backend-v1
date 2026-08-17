@@ -1,58 +1,91 @@
 import os
-import ssl
 import smtplib
-from dotenv import load_dotenv
+from brevo import AsyncBrevo
+from app.core.config import settings
 from email.message import EmailMessage
+from brevo.transactional_emails import (
+    SendTransacEmailRequestSender,
+    SendTransacEmailRequestToItem,
+)
 
-load_dotenv()
-
-MAIL_PORT = 465
 
 DEBUG_PORT = 8025
-
-SMTP_SERVER = "smtp.gmail.com"
-
 DEBUG_SMTP_SERVER = "localhost"
 
-SENDER_ADDR = os.getenv("OAKFOLIO_APP_MAIL_ADDR")
+BREVO_API_KEY = settings.brevo_api_key
+SENDER_ADDR = settings.oakfolio_app_mail_addr
 
-SENDER_MAIL_PASSWORD = os.getenv("OAKFOLIO_APP_MAIL_CLIENT_PASSWORD")
+brevo_client = AsyncBrevo(api_key=BREVO_API_KEY)
+
 
 def build_email_message(to: str, sub: str, content: str):
-	msg = EmailMessage()
-	msg["to"] = to
-	msg["from"] = SENDER_ADDR
-	msg["subject"] = sub
-	msg.set_content(content)
+    msg = EmailMessage()
 
-	return msg
+    msg["to"] = to
+    msg["from"] = SENDER_ADDR
+    msg["subject"] = sub
 
-def send_mail(msg, debug=True):
-	if debug:
-		with smtplib.SMTP(DEBUG_SMTP_SERVER, DEBUG_PORT) as local_mail_server:
-			local_mail_server.send_message(msg)
+    msg.set_content(content)
 
-	else:
-		context = ssl.create_default_context()
-		with smtplib.SMTP_SSL(SMTP_SERVER, MAIL_PORT, context=context) as service_mail_server:
-			service_mail_server.login(SENDER_ADDR, SENDER_MAIL_PASSWORD)
-			service_mail_server.send_message(msg)
+    return msg
 
-def send_email_verification_mail(verification_link, reciepient, debug=False):
-	if not verification_link: return
 
-	subject="Verify your oakfolio account"
+async def send_mail(msg, debug=True):
 
-	content=f"""
+    if debug:
+        with smtplib.SMTP(
+            DEBUG_SMTP_SERVER,
+            DEBUG_PORT
+        ) as local_mail_server:
+
+            local_mail_server.send_message(msg)
+
+    else:
+        result = await brevo_client.transactional_emails.send_transac_email(
+            sender=SendTransacEmailRequestSender(
+                email=msg["from"],
+                name="Oakfolio",
+            ),
+            to=[
+                SendTransacEmailRequestToItem(
+                    email=msg["to"],
+                )
+            ],
+            subject=msg["subject"],
+            text_content=msg.get_content(),
+        )
+
+        return result
+
+
+async def send_email_verification_mail(
+    verification_link,
+    reciepient,
+    debug=False,
+):
+
+    if not verification_link:
+        return
+
+    subject = "Verify your Oakfolio account"
+
+    content = f"""
 	Welcome to Oakfolio
 
-	Please Verify your email by clicking the link below
+	Please verify your email by clicking the link below:
 
 	{verification_link}
 
-	This link will expire in 5 minutes
+	This link will expire in 5 minutes.
 	"""
 
-	message = build_email_message(to=reciepient, sub=subject, content=content)
+    message = build_email_message(
+        to=reciepient,
+        sub=subject,
+        content=content,
+    )
 
-	send_mail(message, debug=debug)
+    await send_mail(
+        message,
+        debug=debug,
+    )
