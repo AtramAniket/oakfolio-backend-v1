@@ -1,5 +1,5 @@
+from sqlalchemy import String, Text, Boolean, DateTime, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Text, Boolean, DateTime, func
 from sqlalchemy import UUID as SQLAlchemyUUID
 from typing import TYPE_CHECKING
 from datetime import datetime
@@ -70,6 +70,12 @@ class User(Base):
 		nullable=False,
 	)
 
+	user_sessions: Mapped[list["UserSession"]] = relationship(
+        "UserSession",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
 	verified_at: Mapped[datetime] = mapped_column(
 		DateTime(timezone=True),
 		server_default=func.now(),
@@ -89,3 +95,42 @@ class User(Base):
 		onupdate=func.now(),
 		nullable=False,
 	)
+
+
+class UserSession(Base):
+
+    __tablename__ = "user_sessions"
+
+    id: Mapped[UUID] = mapped_column(
+        SQLAlchemyUUID(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+    )
+
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="user_sessions",
+    )
+
+    jti: Mapped[UUID] = mapped_column(
+        SQLAlchemyUUID(as_uuid=True),
+        unique=True,
+        nullable=False,
+    )
+
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
