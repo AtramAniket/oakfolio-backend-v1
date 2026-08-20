@@ -95,7 +95,9 @@ async def current_user(
         id=current_user.id,
         email=current_user.email,
         username=current_user.username,
+        avatar_id=current_user.avatar_id,
         verified_at=current_user.verified_at,
+        notifications_enabled=current_user.notifications_enabled,
     )
 
 

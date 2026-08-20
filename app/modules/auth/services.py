@@ -120,12 +120,6 @@ async def login(
     return LoginResponse(
         token_type="bearer",
         access_token=jwt_token,
-        user=UserResponse(
-            id=user.id,
-            email=user.email,
-            username=user.username,
-            verified_at=user.verified_at,
-        ),
     )
 
 
