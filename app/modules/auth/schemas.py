@@ -46,7 +46,9 @@ class UserResponse(BaseModel):
 	id: UUID
 	email: str
 	username: str
+	avatar_id: str
 	verified_at: datetime
+	notifications_enabled: bool
 
 class LoginRequest(BaseModel):
 	password: str
@@ -55,4 +57,3 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
 	token_type: str | None = None
 	access_token: str | None = None
-	user: UserResponse | None = None
