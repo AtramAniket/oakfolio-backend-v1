@@ -96,6 +96,18 @@ class User(Base):
 		nullable=False,
 	)
 
+	avatar_id: Mapped[str] = mapped_column(
+		String(50),
+		nullable=False,
+		default="avatar_01"
+	)
+
+	notifications_enabled: Mapped[bool] = mapped_column(
+		Boolean,
+		nullable=False,
+		default=True
+	)
+
 
 class UserSession(Base):
 
