@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from datetime import datetime
 from app.db.base import Base
 from uuid import UUID, uuid4
+import sqlalchemy as sa
 
 if TYPE_CHECKING:
 	from app.modules.stocks.models import StockPortfolio, StockHolding
@@ -107,7 +108,7 @@ class User(Base):
 		Boolean,
 		nullable=False,
 		default=True,
-		server_default=sqlalchemy.true(),
+		server_default=sa.true(),
 	)
 
 
