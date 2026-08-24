@@ -57,3 +57,46 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
 	token_type: str | None = None
 	access_token: str | None = None
+
+class UpdateUserRequest(BaseModel):
+	username: str | None = None
+	avatar_id: str | None = None
+	notifications_enabled: bool | None = None
+
+	@field_validator("username")
+	@classmethod
+	def validate_username(cls, value):
+		value = value.strip()
+
+		if not value:
+			raise ValueError("Username cannot be empty")
+
+		if(len(value) < 3):
+			raise ValueError("Username must be atleast 3 characters")
+
+		if(len(value) > 50):
+			raise ValueError("Username must not exceed 50 characters")
+
+		return value
+
+	@field_validator("avatar_id")
+	def validate_avatar_id(cls, value):
+
+		valid_avatar_ids = [
+			"avatar_01",
+			"avatar_02",
+			"avatar_03",
+			"avatar_04",
+			"avatar_05",
+			"avatar_06",
+			"avatar_07",
+			"avatar_08",
+		]
+
+		if value not in valid_avatar_ids:
+			raise ValueError("Invalid Avatar ID")
+
+		return value
+
+class UpdateUserResponse(BaseModel):
+	message: str
