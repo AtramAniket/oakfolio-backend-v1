@@ -79,4 +79,5 @@ class CreateNewActivityRequest(BaseModel):
 # ****SCHEMA FOR GETTING ALL ACTIVITIES****
 # *****************************************
 class GetAllActivitiesResponse(BaseModel):
+	message: str
 	activities: list[Activities]
