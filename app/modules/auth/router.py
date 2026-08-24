@@ -1,7 +1,9 @@
 from app.modules.auth.schemas import (
     VerifyRegistrationTokenResponse,
     VerifyRegistrationTokenRequest,
+    UpdateUserResponse,
     VerifyUserResponse,
+    UpdateUserRequest,
     VerifyUserRequest,
     RegisterResponse,
     RegisterRequest,
@@ -46,9 +48,9 @@ async def delete_pending_user(payload: DeleteRequest,db: SessionDep):
 async def create_user(payload: VerifyUserRequest,db: SessionDep):
     return await auth_service.verify_and_create_new_user(db=db, payload=payload)
 
-@auth_router.patch("/update_user")
-async def update_user(payload: None, db: SessionDep):
-    return
+@auth_router.patch("/update_user", response_model=UpdateUserResponse, status_code=status.HTTP_200_OK)
+async def update_user(payload: UpdateUserRequest, db: SessionDep, current_user:UserDep):
+    return await auth_service.update_user(db=db, payload=payload, current_user=current_user)
 
 
 @auth_router.delete("/delete_user/", status_code=status.HTTP_200_OK)
