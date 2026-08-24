@@ -12,7 +12,7 @@ from app.modules.stocks.schema import (
 from uuid import UUID
 from fastapi import APIRouter, status
 from app.api.v1.dependency import SessionDep
-from app.modules.stocks.dependency import UserDep
+from app.modules.auth.dependencies import UserDep
 import app.modules.stocks.service as stocks_service
 
 
