@@ -9,6 +9,7 @@ import sqlalchemy as sa
 
 if TYPE_CHECKING:
 	from app.modules.stocks.models import StockPortfolio, StockHolding
+	from app.modules.activity.models import Activity
 
 
 class PendingRegistration(Base):
@@ -109,6 +110,13 @@ class User(Base):
 		nullable=False,
 		default=True,
 		server_default=sa.true(),
+	)
+
+	user_notifications: Mapped[list["Activity"]] = relationship(
+		"Activity",
+		back_populates="user_activities",
+		cascade="all, delete-orphan",
+		order_by="desc(StockPortfolio.created_at)",
 	)
 
 
