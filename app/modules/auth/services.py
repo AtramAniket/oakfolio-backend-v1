@@ -2,7 +2,9 @@ from app.modules.auth.schemas import (
     VerifyRegistrationTokenResponse,
     VerifyRegistrationTokenRequest,
     VerifyUserResponse,
+    UpdateUserResponse,
     VerifyUserRequest,
+    UpdateUserRequest,
     RegisterResponse,
     RegisterRequest,
     DeleteResponse,
@@ -428,3 +430,19 @@ async def delete_user(current_user: User, db: SessionDep):
         return {
             "message": "User deleted successfully"
         }
+
+
+async def update_user(payload: UpdateUserRequest, db: SessionDep, current_user: User) ->UpdateUserResponse:
+    
+    update_data = payload.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+
+    db.commit()
+
+    db.refresh(current_user)
+
+    return UpdateUserResponse(
+        message="User details updated successfully!"
+    )
