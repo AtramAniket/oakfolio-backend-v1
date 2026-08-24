@@ -77,10 +77,7 @@ authentication_exception = HTTPException(
 )
 
 
-async def login(
-    db: Session,
-    payload: LoginRequest,
-) -> LoginResponse:
+async def login(db: Session, payload: LoginRequest) -> LoginResponse:
 
     # Find user by email
     find_user_statement = select(User).where(
@@ -123,10 +120,7 @@ async def login(
     )
 
 
-async def get_current_session(
-    db: SessionDep,
-    token: str = Depends(oauth2_scheme),
-) -> UserSession:
+async def get_current_session(db: SessionDep, token: str = Depends(oauth2_scheme)) -> UserSession:
 
     try:
         # Decode and validate JWT
@@ -162,10 +156,7 @@ async def get_current_session(
     return user_session
 
 
-async def get_current_user(
-    db: SessionDep,
-    current_session: UserSession = Depends(get_current_session),
-) -> User:
+async def get_current_user(db: SessionDep, current_session: UserSession = Depends(get_current_session)) -> User:
 
     current_user_statement = select(User).where(
         User.id == current_session.user_id
@@ -181,18 +172,12 @@ async def get_current_user(
     return result
 
 
-async def logout_user(
-    db: SessionDep,
-    current_session: UserSession,
-):
+async def logout_user(db: SessionDep, current_session: UserSession):
     db.delete(current_session)
     db.commit()
 
 
-async def verify_user_registration_token(
-    db: Session,
-    payload: VerifyRegistrationTokenRequest,
-) -> VerifyRegistrationTokenResponse:
+async def verify_user_registration_token(db: Session, payload: VerifyRegistrationTokenRequest) -> VerifyRegistrationTokenResponse:
 
     hashed_token = hash_verification_token(
         payload.verification_token
@@ -226,10 +211,7 @@ async def verify_user_registration_token(
     )
 
 
-async def register_user(
-    db: Session,
-    payload: RegisterRequest,
-) -> RegisterResponse:
+async def register_user(db: Session,payload: RegisterRequest) -> RegisterResponse:
 
     # Check if user already registered
     existing_user_statement = select(User).where(
@@ -342,10 +324,7 @@ async def register_user(
     )
 
 
-async def delete_pending_registration(
-    db: Session,
-    payload: DeleteRequest,
-) -> DeleteResponse:
+async def delete_pending_registration(db: Session, payload: DeleteRequest) -> DeleteResponse:
 
     statement = select(PendingRegistration).where(
         PendingRegistration.email == payload.email
@@ -376,10 +355,7 @@ async def delete_pending_registration(
     )
 
 
-async def verify_and_create_new_user(
-    db: Session,
-    payload: VerifyUserRequest,
-) -> VerifyUserResponse:
+async def verify_and_create_new_user(db: Session,payload: VerifyUserRequest) -> VerifyUserResponse:
 
     # Hash incoming raw token
     hashed_token = hash_verification_token(
@@ -430,3 +406,25 @@ async def verify_and_create_new_user(
     return VerifyUserResponse(
         message="User created successfully."
     )
+
+
+async def delete_user(current_user: User, db: SessionDep):
+    statement = select(User).where(
+        User.id == current_user.id
+    )
+
+    result = db.execute(statement)
+
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise user_not_found_exception
+    else:
+
+        db.delete(user)
+
+        db.commit()
+
+        return {
+            "message": "User deleted successfully"
+        }
