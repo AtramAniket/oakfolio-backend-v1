@@ -4,6 +4,7 @@ from sqlalchemy import UUID as SQLAlchemyUUID
 from typing import Optional, TYPE_CHECKING
 from enum import Enum as PythonEnum
 from datetime import datetime
+from app.db.base import Base
 from uuid import UUID, uuid4
 
 
@@ -22,9 +23,9 @@ class ActivityType(PythonEnum):
 	system="system"
 
 
-class Activity(object):
+class Activity(Base):
 	
-	__tablename__ = "notifications"
+	__tablename__ = "activities"
 
 	# Primary Key
 	id: Mapped[UUID] = mapped_column(
