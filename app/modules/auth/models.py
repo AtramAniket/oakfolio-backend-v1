@@ -112,9 +112,9 @@ class User(Base):
 		server_default=sa.true(),
 	)
 
-	user_notifications: Mapped[list["Activity"]] = relationship(
+	user_activities: Mapped[list["Activity"]] = relationship(
 		"Activity",
-		back_populates="user_activities",
+		back_populates="user",
 		cascade="all, delete-orphan",
 		order_by="desc(StockPortfolio.created_at)",
 	)
