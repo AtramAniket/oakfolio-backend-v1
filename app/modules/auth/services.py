@@ -194,8 +194,6 @@ async def verify_user_registration_token(db: Session, payload: VerifyRegistratio
 
     pending_registration = result.scalar_one_or_none()
 
-    print(pending_registration.email)
-
     # Check if token is valid
     if not pending_registration:
         return VerifyRegistrationTokenResponse(
