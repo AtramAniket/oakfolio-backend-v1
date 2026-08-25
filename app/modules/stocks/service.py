@@ -16,7 +16,10 @@ from sqlalchemy.orm import Session
 from app.modules.auth.models import User
 from fastapi import status, HTTPException
 from app.api.v1.dependency import SessionDep
+from app.modules.activity.services import create_new_activity
+from app.modules.activity.models import Activity, ActivityType
 from app.modules.stocks.models import StockPortfolio, StockHolding
+from app.helpers.create_new_activity_helper import create_new_activity
 
 not_found_exception = HTTPException(
 		status_code=status.HTTP_404_NOT_FOUND,
@@ -67,6 +70,20 @@ async def create_new_portfolio(payload: CreateNewPortfolioRequest, db:SessionDep
 
 	db.add(new_portfolio)
 
+	db.flush()
+
+	activity = create_new_activity(
+		db=db,
+		user_id=current_user.id,
+		entity_type="portfolio",
+		title="Portfolio Created",
+		entity_id=new_portfolio.id,
+		type=ActivityType.portfolio_update,
+		description=f"Created Portfolio '{new_portfolio.name}'",
+	)
+
+	db.add(activity)
+
 	db.commit()
 
 	db.refresh(new_portfolio)
@@ -99,6 +116,18 @@ async def edit_portfolio(portfolio_id: UUID, payload: CreateNewPortfolioRequest,
 
 		for field, value in updated_data.items():
 			setattr(portfolio, field, value)
+
+		update_activity = create_new_activity(
+			db=db,
+			entity_id=portfolio.id,
+			user_id=current_user.id,
+			entity_type="portfolio",
+			title="Portfolio Updated",
+			type=ActivityType.portfolio_update,
+			description=f"Updated Portfolio '{updated_data.name}'",
+		)
+
+		db.add(update_activity)
 
 		db.commit()
 
@@ -133,6 +162,18 @@ async def delete_portfolio(portfolio_id: UUID, current_user: User, db: SessionDe
 	if portfolio:
 		
 		db.delete(portfolio)
+
+		delete_activity = create_new_activity(
+			db=db,
+			user_id=current_user.id,
+			entity_type="portfolio",
+			title="Portfolio Deleted",
+			entity_id=portfolio.id,
+			type=ActivityType.portfolio_update,
+			description=f"Deleted Portfolio '{portfolio.name}'",
+		)
+
+		db.add(delete_activity)
 		
 		db.commit()
 
