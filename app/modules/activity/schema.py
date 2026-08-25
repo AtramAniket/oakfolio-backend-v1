@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 from app.modules.activity.models import ActivityType
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
@@ -23,6 +24,7 @@ class Activities(BaseModel):
 	user_id: UUID
 	description: str
 	type: ActivityType
+	created_at: datetime
 	entity_id: Optional[UUID] = None
 	entity_type: Optional[str] = None
 
