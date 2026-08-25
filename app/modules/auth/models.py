@@ -116,7 +116,7 @@ class User(Base):
 		"Activity",
 		back_populates="user",
 		cascade="all, delete-orphan",
-		order_by="desc(StockPortfolio.created_at)",
+		order_by="desc(Activity.created_at)",
 	)
 
 
